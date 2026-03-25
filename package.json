@@ -1,6 +1,6 @@
 {
   "name": "llm-token-cleaner",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pipeline to strip LLM output noise and minimize token count before re-prompting",
   "type": "module",
   "main": "./dist/index.js",
@@ -19,8 +19,17 @@
     "test:coverage": "vitest run --coverage",
     "lint": "tsc --noEmit"
   },
-  "files": ["dist"],
-  "keywords": ["llm", "tokens", "tokenizer", "cleanup", "prompt", "pipeline"],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "llm",
+    "tokens",
+    "tokenizer",
+    "cleanup",
+    "prompt",
+    "pipeline"
+  ],
   "license": "MIT",
   "devDependencies": {
     "typescript": "^5.4.0",
