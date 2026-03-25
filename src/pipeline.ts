@@ -51,6 +51,12 @@ export function clean(text: string, options: CleanOptions = {}): CleanResult {
   if (typeof text !== "string") {
     throw new TypeError("clean() expects a string as the first argument");
   }
+  const maxLength = options.maxLength ?? 500_000;
+  if (text.length > maxLength) {
+    throw new RangeError(
+      `Input length ${text.length} exceeds maxLength ${maxLength}. Pass { maxLength: Infinity } to disable this guard.`,
+    );
+  }
   const cfg = resolveConfig(options);
   const tok = resolveTok(options);
 

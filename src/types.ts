@@ -1,11 +1,28 @@
 /** Unique identifier for each pipeline stage */
 export type StageId =
-  | 'box' | 'emoji' | 'geo' | 'zero'
-  | 'hdr' | 'emph' | 'fences' | 'icode' | 'links' | 'tables' | 'lists' | 'html' | 'ents' | 'fnref' | 'cit'
-  | 'ell' | 'isp' | 'seps' | 'blk' | 'trail';
+  | "box"
+  | "emoji"
+  | "geo"
+  | "zero"
+  | "hdr"
+  | "emph"
+  | "fences"
+  | "icode"
+  | "links"
+  | "tables"
+  | "lists"
+  | "html"
+  | "ents"
+  | "fnref"
+  | "cit"
+  | "ell"
+  | "isp"
+  | "seps"
+  | "blk"
+  | "trail";
 
 /** Which noise category a stage belongs to */
-export type StageCategory = 'hot' | 'struct' | 'clean';
+export type StageCategory = "hot" | "struct" | "clean";
 
 /** A single pipeline stage descriptor */
 export interface Stage {
@@ -18,7 +35,7 @@ export interface Stage {
 }
 
 /** Named presets that configure which stages are enabled */
-export type PresetName = 'reprompt' | 'human' | 'codesafe';
+export type PresetName = "reprompt" | "human" | "codesafe";
 
 /** Per-stage savings breakdown */
 export interface StageStat {
@@ -48,6 +65,12 @@ export interface CleanOptions {
   preset?: PresetName;
   /** Explicit per-stage enable map. Partial — unspecified stages inherit the preset value. */
   stages?: Partial<Record<StageId, boolean>>;
+  /**
+   * Maximum input length in characters. Inputs exceeding this throw `RangeError`.
+   * Pass `Infinity` to disable the guard.
+   * @default 500_000
+   */
+  maxLength?: number;
   /**
    * Custom token counter. Defaults to the built-in char-estimate (~8% error vs cl100k).
    * Swap in gpt-tokenizer or tiktoken for exact counts:

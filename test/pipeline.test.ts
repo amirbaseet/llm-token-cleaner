@@ -194,6 +194,16 @@ describe("input validation", () => {
   it("stream() throws TypeError on invalid preset name", () => {
     expect(() => stream({ preset: "invalid" as any })).toThrow(TypeError);
   });
+
+  it("clean() throws RangeError when input exceeds maxLength", () => {
+    const long = "a".repeat(600_000);
+    expect(() => clean(long)).toThrow(RangeError);
+    expect(() => clean(long)).toThrow(/exceeds maxLength/);
+    // Accepts when maxLength is raised
+    expect(() => clean(long, { maxLength: Infinity })).not.toThrow();
+    // Accepts when exactly at default limit
+    expect(() => clean("a".repeat(500_000))).not.toThrow();
+  });
 });
 
 describe("barrel export (index.ts)", () => {
