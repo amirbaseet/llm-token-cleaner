@@ -1,12 +1,24 @@
-import { STAGES, STAGE_IDS } from './stages.js';
-import { PRESETS } from './presets.js';
-import { estimateTokens } from './tokens.js';
-import type { CleanOptions, CleanResult, StageId, StageStat, StreamCleaner } from './types.js';
-import type { StageMap } from './presets.js';
+import { STAGES, STAGE_IDS } from "./stages.js";
+import { PRESETS } from "./presets.js";
+import { estimateTokens } from "./tokens.js";
+import type {
+  CleanOptions,
+  CleanResult,
+  StageId,
+  StageStat,
+  StreamCleaner,
+} from "./types.js";
+import type { StageMap } from "./presets.js";
 
 /** Build the resolved stage enable-map from CleanOptions */
 function resolveConfig(options: CleanOptions = {}): StageMap {
-  const base = PRESETS[options.preset ?? 'reprompt'];
+  const presetName = options.preset ?? "reprompt";
+  const base = PRESETS[presetName];
+  if (!base) {
+    throw new TypeError(
+      `Unknown preset "${presetName}". Valid presets: ${Object.keys(PRESETS).join(", ")}`,
+    );
+  }
   if (!options.stages) return base;
   const merged = { ...base };
   for (const [id, enabled] of Object.entries(options.stages)) {
@@ -36,11 +48,15 @@ function resolveTok(options: CleanOptions = {}): (t: string) => number {
  * });
  */
 export function clean(text: string, options: CleanOptions = {}): CleanResult {
+  if (typeof text !== "string") {
+    throw new TypeError("clean() expects a string as the first argument");
+  }
   const cfg = resolveConfig(options);
   const tok = resolveTok(options);
 
   let cur = text;
-  let prev = tok(text);
+  const tokensIn = tok(text);
+  let prev = tokensIn;
   const stats: StageStat[] = [];
 
   for (const stage of STAGES) {
@@ -51,10 +67,9 @@ export function clean(text: string, options: CleanOptions = {}): CleanResult {
     prev = now;
   }
 
-  const tokensIn  = tok(text);
   const tokensOut = prev;
-  const saved     = tokensIn - tokensOut;
-  const pct       = tokensIn > 0 ? Math.round((saved / tokensIn) * 100) : 0;
+  const saved = tokensIn - tokensOut;
+  const pct = tokensIn > 0 ? Math.round((saved / tokensIn) * 100) : 0;
 
   return { text: cur, tokensIn, tokensOut, saved, pct, stats };
 }
@@ -82,8 +97,8 @@ export function cleanText(text: string, options: CleanOptions = {}): string {
  * process.stdout.write(cleaner.flush());
  */
 export function stream(options: CleanOptions = {}): StreamCleaner {
-  const cfg = resolveConfig(options);
-  let buf = '';
+  const cfg = resolveConfig(options); // validates preset
+  let buf = "";
 
   function applyAll(text: string): string {
     let cur = text;
@@ -94,22 +109,29 @@ export function stream(options: CleanOptions = {}): StreamCleaner {
   }
 
   function safeFlush(final: boolean): string {
-    if (!buf) return '';
+    if (!buf) return "";
     if (final) {
       const result = applyAll(buf);
-      buf = '';
+      buf = "";
       return result;
     }
-    const lastNewline = buf.lastIndexOf('\n');
-    if (lastNewline === -1) return '';
+    const lastNewline = buf.lastIndexOf("\n");
+    if (lastNewline === -1) return "";
     const safe = buf.slice(0, lastNewline + 1);
     buf = buf.slice(lastNewline + 1);
     return applyAll(safe);
   }
 
   return {
-    push(chunk: string): string { buf += chunk; return safeFlush(false); },
-    flush(): string             { return safeFlush(true); },
-    reset(): void               { buf = ''; },
+    push(chunk: string): string {
+      buf += chunk;
+      return safeFlush(false);
+    },
+    flush(): string {
+      return safeFlush(true);
+    },
+    reset(): void {
+      buf = "";
+    },
   };
 }
