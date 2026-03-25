@@ -151,3 +151,7 @@ interface StreamCleaner {
 ## License
 
 MIT
+
+## Documentation
+
+Full project documentation is available in [docs/llm-token-cleaner-docs.docx](docs/llm-token-cleaner-docs.docx).
