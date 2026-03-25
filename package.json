@@ -1,6 +1,6 @@
 {
   "name": "llm-token-cleaner",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Pipeline to strip LLM output noise and minimize token count before re-prompting",
   "type": "module",
   "main": "./dist/index.js",
